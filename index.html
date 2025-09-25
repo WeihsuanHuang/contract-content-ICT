@@ -2,25 +2,77 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>合同填單匯出</title>
-  <!-- keep HTTPS! -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <title>合同填單</title>
 </head>
 <body>
   <h2>合同填單</h2>
   <form id="contractForm">
-    <!-- (your inputs & selects stay exactly the same) -->
-    <!-- ... -->
-    <button type="button" id="exportBtn">匯出 PDF</button>
+    <label>【1】商企/运营商：</label>
+    <select id="opt1">
+      <option>商企</option>
+      <option>运营商</option>
+    </select><br><br>
+
+    <label>【2】ICT/Circuit/移动业务：</label>
+    <select id="opt2">
+      <option>ICT</option>
+      <option>Circuit</option>
+      <option>移动业务</option>
+    </select><br><br>
+
+    <label>供應商名稱：</label><input id="vendor"><br><br>
+    <label>客戶名稱：</label><input id="customer"><br><br>
+    <label>採購內容：</label><input id="content"><br><br>
+    <label>PO號：</label><input id="po"><br><br>
+    <label>SO號：</label><input id="so"><br><br>
+
+    <label>【3】一/二/三：</label>
+    <select id="opt3">
+      <option>一</option><option>二</option><option>三</option>
+    </select><br><br>
+
+    <label>【4】A/B/C：</label>
+    <select id="opt4">
+      <option>A</option><option>B</option><option>C</option>
+    </select><br><br>
+
+    <label>【5】新增/现有：</label>
+    <select id="opt5">
+      <option>新增</option><option>现有</option>
+    </select><br><br>
+
+    <label>【6】比选/直接采购：</label>
+    <select id="opt6">
+      <option>比选</option><option>直接采购</option>
+    </select><br><br>
+
+    <label>【7】低价中标/客户指定：</label>
+    <select id="opt7">
+      <option>低价中标</option><option>客户指定</option>
+    </select><br><br>
+
+    <label>合同期：</label><input id="term"><br><br>
+    <label>成本：</label><input id="cost"><br><br>
+    <label>總成本：</label><input id="totalCost"><br><br>
+    <label>總收入：</label><input id="totalRevenue"><br><br>
+    <label>利潤率（%）：</label><input id="margin"><br><br>
+
+    <label>客戶經理：</label><input id="am"><br><br>
+    <label>詢價工程師：</label><input id="pe"><br><br>
+    <label>項目經理：</label><input id="pm"><br><br>
+    <label>補充：</label><textarea id="extra"></textarea><br><br>
+
+    <button type="button" onclick="showContract()">顯示合同內容</button>
   </form>
 
-  <!-- Hidden render target to avoid blank PDFs -->
-  <div id="printArea" style="position:fixed; left:-9999px; top:-9999px; white-space:pre-wrap; background:#fff; color:#000; padding:16px; max-width:800px;"></div>
+  <hr>
+  <h3>合同內容：</h3>
+  <div id="output" style="white-space: pre-wrap; border:1px solid #ccc; padding:10px;"></div>
 
   <script>
     function val(id){ return document.getElementById(id)?.value || ""; }
 
-    function buildText(){
+    function showContract(){
       const v = {
         opt1: val("opt1"), opt2: val("opt2"), vendor: val("vendor"), customer: val("customer"),
         content: val("content"), po: val("po"), so: val("so"),
@@ -28,8 +80,7 @@
         opt6: val("opt6"), opt7: val("opt7"),
         term: val("term"), cost: val("cost"), totalCost: val("totalCost"),
         totalRevenue: val("totalRevenue"), margin: val("margin"),
-        am: val("am"), pe: val("pe"), pm: val("pm"),
-        extra: val("extra")
+        am: val("am"), pe: val("pe"), pm: val("pm"), extra: val("extra")
       };
 
       const header =
@@ -38,28 +89,8 @@
       const body =
 `1.本合同对方名称为${v.vendor}。2. 是我方${v.opt5}供应商。3.采购内容：${v.content}；4.客户名称: ${v.customer}。5.合同类型：支出类合同。6.选择对方原因：${v.opt6}（非公开），${v.opt7}。7.我方在合同中主要承担及时验收付款义务。8. 特殊服务需求：无。9.主要风险点：无。10.审批依据：有，销售合同${v.so}。11.不属于存量续签合同。12.合同期限/维保期限：${v.term}。13.成本（含币种）：${v.cost}（不含税）。14.总成本（含币种）：${v.totalCost} (不含税)。15.总收入（含币种）：${v.totalRevenue} (不含税)。16.利润率为${v.margin}%。17.客户经理：${v.am}。18.询价工程师：${v.pe}。19.项目经理：${v.pm}。${v.extra ? "\n" + v.extra : ""}`;
 
-      return { v, text: header + "\n\n" + body };
+      document.getElementById("output").textContent = header + "\n\n" + body;
     }
-
-    document.getElementById("exportBtn").addEventListener("click", function(){
-      const { v, text } = buildText();
-
-      const target = document.getElementById("printArea");
-      target.textContent = text; // use textContent to preserve literal text
-
-      // Optional: tweak options if you like
-      const opt = {
-        margin: 10,
-        filename: `合同_${v.po || "document"}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      html2pdf().set(opt).from(target).save().then(() => {
-        target.textContent = ""; // cleanup
-      });
-    });
   </script>
 </body>
 </html>
